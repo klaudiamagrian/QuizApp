@@ -1,11 +1,17 @@
 package com.example.quizapp;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class RankingActivity extends AppCompatActivity {
 
@@ -17,6 +23,7 @@ public class RankingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_ranking);
 
         RecyclerView recyclerView = findViewById(R.id.recyclerRanking);
+        Button btnBack = findViewById(R.id.btnBackToCategories);
 
         String currentName = getIntent().getStringExtra("CURRENT_NAME");
         int currentScore = getIntent().getIntExtra("CURRENT_SCORE", -1);
@@ -27,6 +34,12 @@ public class RankingActivity extends AppCompatActivity {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new RankingAdapter(players, currentName, currentScore));
+
+        btnBack.setOnClickListener(v -> {
+            Intent intent = new Intent(RankingActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void loadData() {
@@ -40,9 +53,13 @@ public class RankingActivity extends AppCompatActivity {
         for (String item : items) {
             if (item.contains("|")) {
                 String[] parts = item.split("\\|");
-                String name = parts[0];
-                int score = Integer.parseInt(parts[1]);
-                players.add(new Player(name, score));
+
+                if (parts.length >= 2) {
+                    String name = parts[0];
+                    int score = Integer.parseInt(parts[1]);
+
+                    players.add(new Player(name, score));
+                }
             }
         }
     }

@@ -5,9 +5,15 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.widget.Button;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class QuizActivity extends AppCompatActivity {
+
     String name;
     TextView txtQuestion, txtTimer;
     Button btnA, btnB, btnC, btnD;
@@ -16,6 +22,7 @@ public class QuizActivity extends AppCompatActivity {
     int score = 0;
 
     String[][] questions;
+    String[][] selectedQuestions;
 
     CountDownTimer timer;
 
@@ -33,6 +40,7 @@ public class QuizActivity extends AppCompatActivity {
         btnD = findViewById(R.id.btnD);
 
         String category = getIntent().getStringExtra("CATEGORY");
+        name = getIntent().getStringExtra("NAME");
 
         if (category.equals("ANIMALS")) {
             questions = animalsQuestions;
@@ -42,6 +50,9 @@ public class QuizActivity extends AppCompatActivity {
             questions = sportQuestions;
         }
 
+        // losowanie 5 pytań
+        selectedQuestions = getRandomQuestions(questions, 5);
+
         loadQuestion();
 
         btnA.setOnClickListener(v -> checkAnswer(btnA.getText().toString()));
@@ -50,13 +61,28 @@ public class QuizActivity extends AppCompatActivity {
         btnD.setOnClickListener(v -> checkAnswer(btnD.getText().toString()));
     }
 
+    private String[][] getRandomQuestions(String[][] allQuestions, int count) {
+        List<String[]> list = new ArrayList<>();
+
+        Collections.addAll(list, allQuestions);
+        Collections.shuffle(list);
+
+        String[][] randomQuestions = new String[count][6];
+
+        for (int i = 0; i < count; i++) {
+            randomQuestions[i] = list.get(i);
+        }
+
+        return randomQuestions;
+    }
+
     private void loadQuestion() {
-        if (currentQuestion >= questions.length) {
+        if (currentQuestion >= selectedQuestions.length) {
             endQuiz();
             return;
         }
 
-        String[] q = questions[currentQuestion];
+        String[] q = selectedQuestions[currentQuestion];
 
         txtQuestion.setText(q[0]);
         btnA.setText(q[1]);
@@ -70,7 +96,7 @@ public class QuizActivity extends AppCompatActivity {
     private void checkAnswer(String answer) {
         timer.cancel();
 
-        if (answer.equals(questions[currentQuestion][5])) {
+        if (answer.equals(selectedQuestions[currentQuestion][5])) {
             score++;
         }
 
@@ -98,7 +124,7 @@ public class QuizActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, ResultActivity.class);
         intent.putExtra("SCORE", score);
-        intent.putExtra("TOTAL", questions.length);
+        intent.putExtra("TOTAL", selectedQuestions.length);
         intent.putExtra("NAME", name);
         intent.putExtra("CATEGORY", category);
 
